@@ -2,6 +2,7 @@ package org.sagebionetworks.bridge.sdk.rest;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import okhttp3.OkHttpClient;
 import org.junit.Before;
@@ -46,15 +47,18 @@ public class BridgeAuthenticationHandlerTest {
 
         String authToken = bridgeAuthenticationHandler.getSessionToken();
         assertNotNull(authToken);
+        assertTrue(authToken.length() > 0);
 
-        //expires token
+        // expires token
         AuthenticationService authenticatedAuthService = bridgeAuthenticatedRetrofit.create(AuthenticationService.class);
         authenticatedAuthService.signOut().execute();
 
         svc.requestUploadSession(dummyUploadRequest).execute();
 
+        // verify new session token is now being used
         String newAuthToken = bridgeAuthenticationHandler.getSessionToken();
         assertNotNull(newAuthToken);
+        assertTrue(newAuthToken.length() > 0);
         assertNotEquals(authToken, newAuthToken);
     }
 

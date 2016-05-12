@@ -71,7 +71,7 @@ public class BridgeAuthenticationHandler implements Authenticator, Interceptor {
                 .build();
     }
 
-    // for tests
+    // allow tests to inspect current session token
     String getSessionToken() {
         Session session = sessionAtomicReference.get();
         return session == null ? "" : session.sessionToken;

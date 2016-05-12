@@ -12,15 +12,6 @@ import retrofit2.http.POST;
  * Created by liujoshua on 4/8/16.
  */
 public interface AuthenticationService {
-
-    //    v3.auth.signin = /v3/auth/signIn
-    //    v3.auth.signout = /v3/auth/signOut
-    //    v3.auth.requestresetpassword = /v3/auth/requestResetPassword
-    //    v3.auth.resetpassword = /v3/auth/resetPassword
-    //    v3.auth.signup = /v3/auth/signUp
-    //    v3.auth.verifyemail = /v3/auth/verifyEmail
-    //    v3.auth.resendemailverification = /v3/auth/resendEmailVerification
-
     /**
      * @return One of the following responses
      * <ul>
