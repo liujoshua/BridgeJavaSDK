@@ -4,15 +4,21 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.util.Collections;
+import java.io.IOException;
 import java.util.LinkedHashSet;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.sagebionetworks.bridge.rest.BridgeParticipantMapper;
 import org.sagebionetworks.bridge.sdk.exceptions.ConsentRequiredException;
 import org.sagebionetworks.bridge.sdk.models.accounts.EmailCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.SignInCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
+import org.sagebionetworks.bridge.sdk.rest.AuthenticationService;
+import org.sagebionetworks.bridge.sdk.rest.models.users.SignUpRequest;
 import org.sagebionetworks.bridge.sdk.utils.Utilities;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class ClientProvider {
     
@@ -73,19 +79,35 @@ public class ClientProvider {
     /**
      * Sign Up an account with Bridge using the given credentials.
      *
-     * @param studyI
+     * @param studyId
      *      The identifier of the study the participant is signing up with
-     * @param signUp
-     *      The credentials to create an account with
+     * @param participant
+     *      The participant to create an account for
      */
     public static void signUp(String studyId, StudyParticipant participant) {
+        Retrofit r = new Retrofit.Builder().baseUrl(config.getEnvironment().getUrl())
+                .addConverterFactory(JacksonConverterFactory.create(new BridgeParticipantMapper().getMapper())).build();
+        AuthenticationService authenticationService = r.create(AuthenticationService.class);
+
+
+
         checkArgument(isNotBlank(studyId), "Study ID required.");
         checkNotNull(participant, "StudyParticipant required.");
 
         ObjectNode node = (ObjectNode)Utilities.getMapper().valueToTree(participant);
         node.put("study", studyId);
 
-        new BaseApiCaller(null).post(config.getSignUpApi(), node);
+
+        SignUpRequest signUpRequest = null;
+        try {
+            signUpRequest = Utilities.getMapper().readValue(node.traverse(), SignUpRequest.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        authenticationService.signUp(signUpRequest);
+
+//        new BaseApiCaller(null).post(config.getSignUpApi(), node);
     }
     
     /**

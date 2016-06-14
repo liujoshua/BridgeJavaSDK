@@ -34,13 +34,13 @@ However, there is nothing specific to Android in the SDK. </p>
 Sage Bionetworks to create one):</p>
 
 <blockquote><pre>
-SignUpCredentials signUp = new SignUpCredentials("studyIdentifier", "username", "email", "password");
+SignUpCredentials signUp = new SignUpCredentials("study", "username", "email", "password");
 ClientProvider.signUp(signUp);
 
 // check your email and verify your email address
 
 // Now you can sign in
-SignInCredentials signIn = new SignInCredentials("studyIdentifier", "username", "password");
+SignInCredentials signIn = new SignInCredentials("study", "username", "password");
 Session session = ClientProvider.signIn(config.getAccountCredentials());
 </pre></blockquote>
 
