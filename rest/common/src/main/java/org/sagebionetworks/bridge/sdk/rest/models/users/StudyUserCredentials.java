@@ -32,6 +32,6 @@ public class StudyUserCredentials {
 
     @Override
     public String toString() {
-        return String.format("SignInCredentials[study=%, email=%s, password=[REDACTED]", study, email);
+        return String.format("StudyUserCredentials[study=%, email=%s, password=[REDACTED]", study, email);
     }
 }

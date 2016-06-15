@@ -4,19 +4,23 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.Collections;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import okhttp3.OkHttpClient;
 import org.sagebionetworks.bridge.rest.BridgeParticipantMapper;
+import org.sagebionetworks.bridge.sdk.exceptions.BridgeSDKException;
 import org.sagebionetworks.bridge.sdk.exceptions.ConsentRequiredException;
 import org.sagebionetworks.bridge.sdk.models.accounts.EmailCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.SignInCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
+import org.sagebionetworks.bridge.sdk.rest.AuthenticationHandler;
 import org.sagebionetworks.bridge.sdk.rest.AuthenticationService;
 import org.sagebionetworks.bridge.sdk.rest.models.users.SignUpRequest;
 import org.sagebionetworks.bridge.sdk.utils.Utilities;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -89,6 +93,11 @@ public class ClientProvider {
                 .addConverterFactory(JacksonConverterFactory.create(new BridgeParticipantMapper().getMapper())).build();
         AuthenticationService authenticationService = r.create(AuthenticationService.class);
 
+        AuthenticationHandler ah = new AuthenticationHandler()
+        OkHttpClient ac = new OkHttpClient.Builder().addInterceptor()
+        Retrofit ar = new Retrofit.Builder().baseUrl(config.getEnvironment().getUrl())
+                .addConverterFactory(JacksonConverterFactory.create(new BridgeParticipantMapper().getMapper())).build();
+
 
 
         checkArgument(isNotBlank(studyId), "Study ID required.");
@@ -101,14 +110,14 @@ public class ClientProvider {
         SignUpRequest signUpRequest = null;
         try {
             signUpRequest = Utilities.getMapper().readValue(node.traverse(), SignUpRequest.class);
+            authenticationService.signUp(signUpRequest).execute();
         } catch (IOException e) {
-            e.printStackTrace();
+
         }
-
-        authenticationService.signUp(signUpRequest);
-
-//        new BaseApiCaller(null).post(config.getSignUpApi(), node);
+        BaseApiCaller.executeCall(authenticationService.signUp(signUpRequest));
     }
+
+
     
     /**
      * Resend an email verification request to the supplied email address.

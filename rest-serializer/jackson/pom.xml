@@ -13,6 +13,7 @@
     <url>https://api.sagebridge.org</url>
 
     <modules>
+        <module>common</module>
         <module>participant</module>
     </modules>
 
