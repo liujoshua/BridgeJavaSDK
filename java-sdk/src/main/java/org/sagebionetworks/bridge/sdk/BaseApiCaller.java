@@ -10,12 +10,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -45,12 +49,8 @@ import org.sagebionetworks.bridge.sdk.models.upload.UploadRequest;
 import org.sagebionetworks.bridge.sdk.utils.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
+import retrofit2.Call;
+import retrofit2.Response;
 
 class BaseApiCaller {
 
@@ -198,6 +198,14 @@ class BaseApiCaller {
         logger.debug("DELETE {}", url);
 
         return executeRequest(request, url);
+    }
+
+    public static <T> Response<T> executeCall(Call<T> call) {
+        try {
+            return call.execute();
+        } catch (IOException e) {
+            throw new BridgeSDKException(CONNECTION_FAILED, e, call.request().url().toString());
+        }
     }
 
     private HttpResponse executeRequest(Request request, String url) {
