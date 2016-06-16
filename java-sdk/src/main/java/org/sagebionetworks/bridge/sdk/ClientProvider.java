@@ -4,33 +4,38 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.io.IOException;
 import java.util.LinkedHashSet;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import okhttp3.OkHttpClient;
 import org.sagebionetworks.bridge.rest.BridgeParticipantMapper;
-import org.sagebionetworks.bridge.sdk.exceptions.BridgeSDKException;
 import org.sagebionetworks.bridge.sdk.exceptions.ConsentRequiredException;
 import org.sagebionetworks.bridge.sdk.models.accounts.EmailCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.SignInCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
-import org.sagebionetworks.bridge.sdk.rest.AuthenticationHandler;
 import org.sagebionetworks.bridge.sdk.rest.AuthenticationService;
 import org.sagebionetworks.bridge.sdk.rest.models.users.SignUpRequest;
+import org.sagebionetworks.bridge.sdk.rest.models.users.StudyUser;
+import org.sagebionetworks.bridge.sdk.rest.models.users.StudyUserCredentials;
 import org.sagebionetworks.bridge.sdk.utils.Utilities;
-import retrofit2.Call;
-import retrofit2.Response;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class ClientProvider {
     
-    private static final Config config = new Config();
+    private static final Config CONFIG = new Config();
     
-    private static ClientInfo info = new ClientInfo.Builder().build();
+    private static ClientInfo INFO = new ClientInfo.Builder().build();
+
+    private final static AuthenticationService AUTHENTICATION_SERVICE;
     
-    private static LinkedHashSet<String> languages = new LinkedHashSet<>();
+    private static LinkedHashSet<String> LANGUAGES = new LinkedHashSet<>();
+
+    static {
+        Retrofit r = new Retrofit.Builder().baseUrl(CONFIG.getEnvironment().getUrl())
+                .addConverterFactory(JacksonConverterFactory.create(new BridgeParticipantMapper().getMapper())).build();
+        AUTHENTICATION_SERVICE = r.create(AuthenticationService.class);
+    }
     
     /**
      * Retrieve the Config object for the system.
@@ -38,15 +43,15 @@ public class ClientProvider {
      * @return Config
      */
     public static Config getConfig() {
-        return config;
+        return CONFIG;
     }
     
     public static ClientInfo getClientInfo() {
-        return info;
+        return INFO;
     }
     
     public static synchronized void setClientInfo(ClientInfo clientInfo) {
-        info = checkNotNull(clientInfo); 
+        INFO = checkNotNull(clientInfo);
     }
     
     public static void addLanguage(String language) {
@@ -55,15 +60,15 @@ public class ClientProvider {
         // Would like to parse and verify this as a LanguageRange object,
         // which fully supports Accept-Language header syntax. It's a Java 8
         // feature and we're on Java 7. Put it on the TODO list.
-        languages.add(language);    
+        LANGUAGES.add(language);
     }
     
     public static LinkedHashSet<String> getLanguages() {
-        return Utilities.newLinkedHashSet(languages);
+        return Utilities.newLinkedHashSet(LANGUAGES);
     }
     
     public static void clearLanguages() {
-        languages = new LinkedHashSet<>();
+        LANGUAGES = new LinkedHashSet<>();
     }
 
     /**
@@ -76,7 +81,10 @@ public class ClientProvider {
     public static Session signIn(SignInCredentials signIn) throws ConsentRequiredException {
         checkNotNull(signIn, "SignInCredentials required.");
 
-        UserSession userSession = new BaseApiCaller(null).post(config.getSignInApi(), signIn, UserSession.class);
+        org.sagebionetworks.bridge.sdk.rest.models.users.Session session = new BaseApiCaller(null).executeCall(AUTHENTICATION_SERVICE.signIn(Utilities.getObjectAsType(signIn,
+                StudyUserCredentials.class)));
+
+        UserSession userSession = Utilities.getObjectAsType(session, UserSession.class);
         return new BridgeSession(userSession);
     }
 
@@ -89,35 +97,15 @@ public class ClientProvider {
      *      The participant to create an account for
      */
     public static void signUp(String studyId, StudyParticipant participant) {
-        Retrofit r = new Retrofit.Builder().baseUrl(config.getEnvironment().getUrl())
-                .addConverterFactory(JacksonConverterFactory.create(new BridgeParticipantMapper().getMapper())).build();
-        AuthenticationService authenticationService = r.create(AuthenticationService.class);
-
-        AuthenticationHandler ah = new AuthenticationHandler()
-        OkHttpClient ac = new OkHttpClient.Builder().addInterceptor()
-        Retrofit ar = new Retrofit.Builder().baseUrl(config.getEnvironment().getUrl())
-                .addConverterFactory(JacksonConverterFactory.create(new BridgeParticipantMapper().getMapper())).build();
-
-
-
         checkArgument(isNotBlank(studyId), "Study ID required.");
         checkNotNull(participant, "StudyParticipant required.");
 
-        ObjectNode node = (ObjectNode)Utilities.getMapper().valueToTree(participant);
+        ObjectNode node = Utilities.getMapper().valueToTree(participant);
         node.put("study", studyId);
 
-
-        SignUpRequest signUpRequest = null;
-        try {
-            signUpRequest = Utilities.getMapper().readValue(node.traverse(), SignUpRequest.class);
-            authenticationService.signUp(signUpRequest).execute();
-        } catch (IOException e) {
-
-        }
-        BaseApiCaller.executeCall(authenticationService.signUp(signUpRequest));
+        SignUpRequest signUpRequest = Utilities.getJsonAsType(node, SignUpRequest.class);;
+        new BaseApiCaller(null).executeCall(AUTHENTICATION_SERVICE.signUp(signUpRequest));
     }
-
-
     
     /**
      * Resend an email verification request to the supplied email address.
@@ -127,8 +115,10 @@ public class ClientProvider {
      */
     public static void resendEmailVerification(EmailCredentials email) {
         checkNotNull(email, "EmailCredentials required");
-        
-        new BaseApiCaller(null).post(config.getResendEmailVerificationApi(), email);
+
+        StudyUser studyUser = Utilities.getObjectAsType(email, StudyUser.class);
+
+        new BaseApiCaller(null).executeCall(AUTHENTICATION_SERVICE.resendEmailVerificataion(studyUser));
     }
 
     /**
@@ -140,6 +130,8 @@ public class ClientProvider {
     public static void requestResetPassword(EmailCredentials email) {
         checkNotNull(email, "EmailCredentials required");
 
-        new BaseApiCaller(null).post(config.getRequestResetPasswordApi(), email);
+        StudyUser studyUser = Utilities.getObjectAsType(email, StudyUser.class);
+
+        new BaseApiCaller(null).executeCall(AUTHENTICATION_SERVICE.requestResetPassword(studyUser));
     }
 }

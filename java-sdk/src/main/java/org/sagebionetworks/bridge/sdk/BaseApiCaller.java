@@ -10,16 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -49,6 +45,13 @@ import org.sagebionetworks.bridge.sdk.models.upload.UploadRequest;
 import org.sagebionetworks.bridge.sdk.utils.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -200,9 +203,12 @@ class BaseApiCaller {
         return executeRequest(request, url);
     }
 
-    public static <T> Response<T> executeCall(Call<T> call) {
+    public  <T> T executeCall(Call<T> call) {
         try {
-            return call.execute();
+            Response<T> response = call.execute();
+            throwExceptionOnErrorStatus(response, call.request().url().toString());
+
+            return response.body();
         } catch (IOException e) {
             throw new BridgeSDKException(CONNECTION_FAILED, e, call.request().url().toString());
         }
@@ -251,42 +257,40 @@ class BaseApiCaller {
         return Utilities.getJsonAsType(responseBody, type);
     }
 
-    private JsonNode getJsonNode(HttpResponse response) {
+    private void throwExceptionOnErrorStatus(int statusCode,
+                                             String statusReasonPhrase,
+                                             List<String> apiStatusHeaders,
+                                             String responseBody,
+                                             UserSession session,
+                                             String url) {
+
+        logger.debug("{} RESPONSE: {}", statusCode, responseBody);
+
+        // Deprecation warning
+        if (apiStatusHeaders.size() > 0 && "deprecated".equals(apiStatusHeaders.get(0))) {
+            logger.warn(url +
+                    " is a deprecated API. This API may return 410 (Gone) at a future date. Please consult the API documentation for an " +
+                    "alternative.");
+        }
+
+        JsonNode response;
         try {
-            return mapper.readTree(getResponseBody(response));
+            response = mapper.readTree(responseBody);
         } catch (IOException e) {
             // NOTE: It turns out the most likely reason for this is that bad JSON was posted to the
             // server to start with, which causes play to return an HTML page... which causes this
             // method to fail because it's not JSON.
             throw new BridgeSDKException("A problem occurred while processing the response body.", e);
         }
-    }
 
-    @SuppressWarnings("unchecked")
-    private void throwExceptionOnErrorStatus(HttpResponse response, String url) {
-        try {
-            logger.debug("{} RESPONSE: {}", response.getStatusLine().getStatusCode(), EntityUtils.toString(response.getEntity()));
-        } catch(IOException e) {
-            logger.debug("{} RESPONSE: <ERROR>", response.getStatusLine().getStatusCode());
-        }
-
-        // Deprecation warning
-        Header[] statusHeaders = response.getHeaders(BRIDGE_API_STATUS_HEADER);
-        if (statusHeaders.length > 0 && "deprecated".equals(statusHeaders[0].getValue())) {
-            logger.warn(url + " is a deprecated API. This API may return 410 (Gone) at a future date. Please consult the API documentation for an alternative.");
-        }
-
-        StatusLine status = response.getStatusLine();
-        int statusCode = status.getStatusCode();
         if (statusCode < 200 || statusCode > 299) {
             BridgeSDKException e = null;
             try {
-                JsonNode node = getJsonNode(response);
 
                 // Not having a message is actually pretty bad
                 String message = "There has been an error on the server";
-                if (node.has("message")) {
-                    message = node.get("message").asText();
+                if (response.has("message")) {
+                    message = response.get("message").asText();
                 }
                 if (statusCode == 401) {
                     e = new NotAuthenticatedException(message, url);
@@ -297,7 +301,6 @@ class BaseApiCaller {
                 } else if (statusCode == 410) {
                     e = new UnsupportedVersionException(message, url);
                 } else if (statusCode == 412) {
-                    UserSession session = getResponseBodyAsType(response, UserSession.class);
                     e = new ConsentRequiredException("Consent required.", url, new BridgeSession(session));
                 } else if (statusCode == 409 && message.contains("already exists")) {
                     e = new EntityAlreadyExistsException(message, url);
@@ -305,21 +308,54 @@ class BaseApiCaller {
                     e = new ConcurrentModificationException(message, url);
                 } else if (statusCode == 400 && message.contains("A published survey")) {
                     e = new PublishedSurveyException(message, url);
-                } else  if (statusCode == 400 && node.has("errors")) {
-                    Map<String, List<String>> errors = (Map<String, List<String>>) mapper.convertValue(
-                            node.get("errors"), new TypeReference<HashMap<String, ArrayList<String>>>() {});
+                } else if (statusCode == 400 && response.has("errors")) {
+                    Map<String, List<String>> errors = (Map<String, List<String>>) Utilities.getMapper()
+                            .convertValue(response.get("errors"), new TypeReference<HashMap<String, ArrayList<String>>>() {});
                     e = new InvalidEntityException(message, errors, url);
                 } else if (statusCode == 400) {
                     e = new BadRequestException(message, url);
                 } else {
-                    e = new BridgeSDKException(message, status.getStatusCode(), url);
+                    e = new BridgeSDKException(message, statusCode, url);
                 }
-            } catch(Throwable t) {
+            } catch (Throwable t) {
                 t.printStackTrace();
-                throw new BridgeSDKException(status.getReasonPhrase(), status.getStatusCode(), url);
+                throw new BridgeSDKException(statusReasonPhrase, statusCode, url);
             }
             throw e;
         }
+    }
+
+    private void throwExceptionOnErrorStatus(Response response, String url) {
+        String responseBody = response.raw().body().toString();
+
+        throwExceptionOnErrorStatus(response.code(),
+                response.message(),
+                response.headers().values(BRIDGE_API_STATUS_HEADER),
+                responseBody,
+                Utilities.getJsonAsType(responseBody, UserSession.class),
+                url
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private void throwExceptionOnErrorStatus(HttpResponse response, String url) {
+        StatusLine statusLine = response.getStatusLine();
+
+        Header[] apiStatusHeaders = response.getHeaders(BRIDGE_API_STATUS_HEADER);
+
+        List<String> headerValues = Lists.newArrayListWithCapacity(apiStatusHeaders.length);
+
+        for (Header header : apiStatusHeaders) {
+            headerValues.add(header.getValue());
+        }
+
+        throwExceptionOnErrorStatus(statusLine.getStatusCode(),
+                statusLine.getReasonPhrase(),
+                headerValues,
+                getResponseBody(response),
+                getResponseBodyAsType(response, UserSession.class),
+                url
+        );
     }
 
     private String getFullUrl(String url) {

@@ -7,13 +7,6 @@ import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -27,8 +20,16 @@ import org.sagebionetworks.bridge.sdk.models.holders.SimpleGuidCreatedOnVersionH
 import org.sagebionetworks.bridge.sdk.models.holders.SimpleGuidHolder;
 import org.sagebionetworks.bridge.sdk.models.holders.SimpleGuidVersionHolder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
+
 public final class Utilities {
     private static final String CONNECTION_FAILED = "Connection to server failed or aborted.";
     private static final String[] schemes = { "http", "https" };
@@ -94,12 +95,40 @@ public final class Utilities {
         return copy;
     }
 
+    public static <T> T getObjectAsType(Object object, Class<T> c) {
+        String json;
+        try {
+            json = MAPPER.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            String message = String.format("Could not process %s: %s into JSON", object.getClass().getSimpleName(), object.toString());
+            throw new BridgeSDKException(message, e);
+        }
+
+        try {
+            return MAPPER.readValue(json, c);
+        } catch (IOException e) {
+            throw new BridgeSDKException("Error message: " + e.getMessage()
+                    + "\nSomething went wrong while converting JSON into " + c.getSimpleName()
+                    + ": json=" + json, e);
+        }
+    }
+
     public static String getObjectAsJson(Object object) {
         try {
             return MAPPER.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             String message = String.format("Could not process %s: %s into JSON", object.getClass().getSimpleName(), object.toString());
             throw new BridgeSDKException(message, e);
+        }
+    }
+
+    public static <T> T getJsonAsType(JsonNode json, Class<T> c) {
+        try {
+            return MAPPER.readValue(json.traverse(), c);
+        } catch (IOException e) {
+            throw new BridgeSDKException("Error message: " + e.getMessage()
+                    + "\nSomething went wrong while converting JSON into " + c.getSimpleName()
+                    + ": json=" + json, e);
         }
     }
 
