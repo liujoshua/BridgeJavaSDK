@@ -1,5 +1,7 @@
 package org.sagebionetworks.bridge.rest;
 
+import org.sagebionetworks.bridge.sdk.rest.BridgeCommonMapper;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**

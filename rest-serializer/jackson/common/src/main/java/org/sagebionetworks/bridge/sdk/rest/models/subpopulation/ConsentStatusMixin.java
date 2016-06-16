@@ -1,4 +1,4 @@
-package org.sagebionetworks.bridge.rest.models.subpopulation;
+package org.sagebionetworks.bridge.sdk.rest.models.subpopulation;
 
 import org.sagebionetworks.bridge.sdk.rest.models.subpopulations.ConsentStatus;
 

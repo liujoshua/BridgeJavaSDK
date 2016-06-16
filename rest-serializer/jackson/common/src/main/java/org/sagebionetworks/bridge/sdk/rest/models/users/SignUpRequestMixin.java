@@ -1,4 +1,4 @@
-package org.sagebionetworks.bridge.rest.models.users;
+package org.sagebionetworks.bridge.sdk.rest.models.users;
 
 import java.util.LinkedHashSet;
 import java.util.List;

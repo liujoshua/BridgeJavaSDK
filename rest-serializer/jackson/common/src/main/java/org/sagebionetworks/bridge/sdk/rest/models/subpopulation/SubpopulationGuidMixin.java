@@ -1,4 +1,4 @@
-package org.sagebionetworks.bridge.rest.models.subpopulation;
+package org.sagebionetworks.bridge.sdk.rest.models.subpopulation;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.sagebionetworks.bridge.sdk.rest.models.subpopulations.SubpopulationGuid;

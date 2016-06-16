@@ -6,25 +6,27 @@ import java.util.Objects;
 /**
  * Created by liujoshua on 6/15/16.
  */
-public class ConsentStatus {public static boolean isUserConsented(Map<SubpopulationGuid,ConsentStatus> statuses) {
-    checkNotNull(statuses);
-    if (statuses.isEmpty()) {
-        return false;
-    }
-    for (ConsentStatus status : statuses.values()) {
-        if (status.isRequired() && !status.isConsented()) {
+public class ConsentStatus {
+    public static boolean isUserConsented(Map<SubpopulationGuid, ConsentStatus> statuses) {
+        Objects.requireNonNull(statuses);
+        if (statuses.isEmpty()) {
             return false;
         }
+        for (ConsentStatus status : statuses.values()) {
+            if (status.isRequired() && !status.isConsented()) {
+                return false;
+            }
+        }
+        return true;
     }
-    return true;
-}
 
     /**
      * Are all the required consents up-to-date?
+     *
      * @return
      */
-    public static boolean isConsentCurrent(Map<SubpopulationGuid,ConsentStatus> statuses) {
-        checkNotNull(statuses);
+    public static boolean isConsentCurrent(Map<SubpopulationGuid, ConsentStatus> statuses) {
+        Objects.requireNonNull(statuses);
         if (statuses.isEmpty()) {
             return false;
         }
@@ -94,9 +96,9 @@ public class ConsentStatus {public static boolean isUserConsented(Map<Subpopulat
         if (obj == null || getClass() != obj.getClass())
             return false;
         ConsentStatus other = (ConsentStatus) obj;
-        return Objects.equals(name, other.name) && Objects.equals(subpopulationGuid, other.subpopulationGuid)
-                && Objects.equals(required, other.required) && Objects.equals(consented, other.consented)
-                && Objects.equals(mostRecentConsent, other.mostRecentConsent);
+        return Objects.equals(name, other.name) && Objects.equals(subpopulationGuid, other.subpopulationGuid) &&
+                Objects.equals(required, other.required) && Objects.equals(consented, other.consented) &&
+                Objects.equals(mostRecentConsent, other.mostRecentConsent);
     }
 
 }

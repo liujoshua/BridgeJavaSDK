@@ -1,4 +1,4 @@
-package org.sagebionetworks.bridge.rest.models.users;
+package org.sagebionetworks.bridge.sdk.rest.models.users;
 
 /**
  * Created by liujoshua on 6/15/16.
