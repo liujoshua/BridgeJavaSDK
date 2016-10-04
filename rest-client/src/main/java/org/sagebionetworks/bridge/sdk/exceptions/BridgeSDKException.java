@@ -1,8 +1,6 @@
 package org.sagebionetworks.bridge.sdk.exceptions;
 
-import static org.sagebionetworks.bridge.sdk.utils.Utilities.TO_STRING_STYLE;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import com.google.common.base.MoreObjects;
 
 @SuppressWarnings("serial")
 public class BridgeSDKException extends RuntimeException {
@@ -74,9 +72,10 @@ public class BridgeSDKException extends RuntimeException {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, TO_STRING_STYLE)
-                .append("message", getMessage())
-                .append("statusCode", getStatusCode())
-                .append("endpoint",getRestEndpoint()).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("message", getMessage())
+                .add("statusCode", getStatusCode())
+                .add("endpoint",getRestEndpoint())
+                .toString();
     }
 }

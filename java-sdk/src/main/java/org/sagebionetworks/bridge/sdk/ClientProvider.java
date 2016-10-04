@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 
 import org.sagebionetworks.bridge.sdk.exceptions.ConsentRequiredException;
 import org.sagebionetworks.bridge.sdk.models.accounts.EmailCredentials;
-import org.sagebionetworks.bridge.sdk.models.accounts.SignInCredentials;
+import org.sagebionetworks.bridge.sdk.models.accounts.StudyUserCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
 import org.sagebionetworks.bridge.sdk.utils.Utilities;
 
@@ -63,8 +63,8 @@ public class ClientProvider {
      *            The credentials you wish to sign in with.
      * @return Session
      */
-    public static Session signIn(SignInCredentials signIn) throws ConsentRequiredException {
-        checkNotNull(signIn, "SignInCredentials required.");
+    public static Session signIn(StudyUserCredentials signIn) throws ConsentRequiredException {
+        checkNotNull(signIn, "StudyUserCredentials required.");
 
         UserSession userSession = new BaseApiCaller(null).post(config.getSignInApi(), signIn, UserSession.class);
         return new BridgeSession(userSession);

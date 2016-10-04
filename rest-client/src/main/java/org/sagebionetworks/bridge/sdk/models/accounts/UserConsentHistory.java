@@ -1,17 +1,15 @@
 package org.sagebionetworks.bridge.sdk.models.accounts;
 
-import static org.sagebionetworks.bridge.sdk.utils.Utilities.TO_STRING_STYLE;
-
 import java.util.Objects;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
-import org.sagebionetworks.bridge.sdk.models.subpopulations.SubpopulationGuid;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
+
+import org.sagebionetworks.bridge.sdk.models.subpopulations.SubpopulationGuid;
 
 public final class UserConsentHistory {
     
@@ -106,10 +104,17 @@ public final class UserConsentHistory {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, TO_STRING_STYLE).append("subpopulationGuid", subpopulationGuid)
-                .append("consentCreatedOn", consentCreatedOn).append("name", name).append("birthdate", birthdate)
-                .append("imageData", imageData).append("imageMimeType", imageMimeType).append("signedOn", signedOn)
-                .append("withdrewOn", withdrewOn).append("hasSignedActiveConsent", hasSignedActiveConsent).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("subpopulationGuid", subpopulationGuid)
+                .add("consentCreatedOn", consentCreatedOn)
+                .add("name", name)
+                .add("birthdate", birthdate)
+                .add("imageData", imageData)
+                .add("imageMimeType", imageMimeType)
+                .add("signedOn", signedOn)
+                .add("withdrewOn", withdrewOn)
+                .add("hasSignedActiveConsent", hasSignedActiveConsent)
+                .toString();
     }
 
 }

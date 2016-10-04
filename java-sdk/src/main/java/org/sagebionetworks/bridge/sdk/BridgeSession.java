@@ -5,14 +5,14 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.sagebionetworks.bridge.sdk.models.accounts.SharingScope;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
 import org.sagebionetworks.bridge.sdk.models.subpopulations.ConsentStatus;
 import org.sagebionetworks.bridge.sdk.models.subpopulations.SubpopulationGuid;
 
-import com.google.common.collect.ImmutableMap;
-
-class BridgeSession implements Session {
+class BridgeSession implements ClientFactory, Session {
 
     private static final String NOT_AUTHENTICATED = "This session has been signed out; create a new session to retrieve a valid client.";
 

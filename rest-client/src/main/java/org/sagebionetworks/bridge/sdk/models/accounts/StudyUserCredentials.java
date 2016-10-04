@@ -1,26 +1,25 @@
 package org.sagebionetworks.bridge.sdk.models.accounts;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
-public final class SignInCredentials {
+public final class StudyUserCredentials {
 
     private String studyIdentifier;
     private String email;
     private String password;
 
     @JsonCreator
-    public SignInCredentials(@JsonProperty("study") String studyIdentifier, @JsonProperty("email") String email,
-            @JsonProperty("password") String password) {
-        checkArgument(isNotBlank(studyIdentifier), "Study identifier cannot be blank/null");
-        checkArgument(isNotBlank(email), "Email cannot be blank/null");
-        checkArgument(isNotBlank(password), "Password cannot be blank/null");
-        
+    public StudyUserCredentials(@JsonProperty("study") String studyIdentifier, @JsonProperty("email") String email,
+                                @JsonProperty("password") String password) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(studyIdentifier), "Study identifier cannot be blank/null");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(email), "Email cannot be blank/null");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(password), "Password cannot be blank/null");
+
         this.studyIdentifier = studyIdentifier;
         this.email = email;
         this.password = password;
@@ -77,13 +76,13 @@ public final class SignInCredentials {
             return true;
         if (obj == null || getClass() != obj.getClass())
             return false;
-        SignInCredentials other = (SignInCredentials) obj;
+        StudyUserCredentials other = (StudyUserCredentials) obj;
         return (Objects.equals(studyIdentifier, other.studyIdentifier) && Objects.equals(password, other.password) && Objects
                 .equals(email, other.email));
     }
 
     @Override
     public String toString() {
-        return String.format("SignInCredentials[study=%, email=%s, password=[REDACTED]", studyIdentifier, email);
+        return String.format("StudyUserCredentials[study=%, email=%s, password=[REDACTED]", studyIdentifier, email);
     }
 }

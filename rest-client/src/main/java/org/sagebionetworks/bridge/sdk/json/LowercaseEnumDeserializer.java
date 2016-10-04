@@ -2,12 +2,12 @@ package org.sagebionetworks.bridge.sdk.json;
 
 import java.io.IOException;
 
-import org.sagebionetworks.bridge.sdk.models.studies.OperatingSystem;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
+
+import org.sagebionetworks.bridge.sdk.models.studies.OperatingSystem;
 
 @SuppressWarnings("serial")
 class LowercaseEnumDeserializer extends StdScalarDeserializer<Enum<?>> {

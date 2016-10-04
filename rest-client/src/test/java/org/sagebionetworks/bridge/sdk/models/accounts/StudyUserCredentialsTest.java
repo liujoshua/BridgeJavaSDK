@@ -1,28 +1,28 @@
 package org.sagebionetworks.bridge.sdk.models.accounts;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
-
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import org.sagebionetworks.bridge.sdk.utils.Utilities;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class SignInCredentialsTest {
+import org.sagebionetworks.bridge.sdk.Configuration;
+
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+
+public class StudyUserCredentialsTest {
     
     @Test
     public void equalsContract() {
-        EqualsVerifier.forClass(SignInCredentials.class).suppress(Warning.NONFINAL_FIELDS).allFieldsShouldBeUsed().verify();
+        EqualsVerifier.forClass(StudyUserCredentials.class).suppress(Warning.NONFINAL_FIELDS).allFieldsShouldBeUsed().verify();
     }
     
     @Test
     public void canSerializer() throws Exception {
-        SignInCredentials signIn = new SignInCredentials("study-key", "email@email.com", "password");
+        StudyUserCredentials signIn = new StudyUserCredentials("study-key", "email@email.com", "password");
         
-        JsonNode node = Utilities.getMapper().valueToTree(signIn);
+        JsonNode node = Configuration.getMapper().valueToTree(signIn);
         assertEquals("study-key", node.get("study").asText());
         assertEquals("email@email.com", node.get("username").asText());
         assertEquals("email@email.com", node.get("email").asText());

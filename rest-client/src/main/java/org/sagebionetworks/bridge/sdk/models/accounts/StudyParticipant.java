@@ -1,22 +1,20 @@
 package org.sagebionetworks.bridge.sdk.models.accounts;
 
-import static org.sagebionetworks.bridge.sdk.utils.Utilities.TO_STRING_STYLE;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.joda.time.DateTime;
-
-import org.sagebionetworks.bridge.sdk.Roles;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import org.sagebionetworks.bridge.sdk.Roles;
 
 public final class StudyParticipant {
 
@@ -151,12 +149,24 @@ public final class StudyParticipant {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, TO_STRING_STYLE).append("firstName", firstName).append("lastName", lastName)
-                .append("externalId", externalId).append("password", "[REDACTED]").append("sharingScope", sharingScope)
-                .append("notifyByEmail", notifyByEmail).append("email", email).append("healthCode", "[REDACTED]")
-                .append("dataGroups", dataGroups).append("attributes", attributes).append("roles", roles)
-                .append("status", status).append("createdOn", createdOn).append("languages", languages)
-                .append("consentHistories", consentHistories).append("id",id).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("firstName", firstName)
+                .add("lastName", lastName)
+                .add("externalId", externalId)
+                .add("password", "[REDACTED]")
+                .add("sharingScope", sharingScope)
+                .add("notifyByEmail", notifyByEmail)
+                .add("email", email)
+                .add("healthCode", "[REDACTED]")
+                .add("dataGroups", dataGroups)
+                .add("attributes", attributes)
+                .add("roles", roles)
+                .add("status", status)
+                .add("createdOn", createdOn)
+                .add("languages", languages)
+                .add("consentHistories", consentHistories)
+                .add("id",id)
+                .toString();
     }
     
     public static class Builder {

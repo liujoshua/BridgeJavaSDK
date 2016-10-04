@@ -1,15 +1,13 @@
 package org.sagebionetworks.bridge.sdk.models.subpopulations;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.sagebionetworks.bridge.sdk.utils.Utilities.TO_STRING_STYLE;
 
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 public final class ConsentStatus {
 
@@ -99,12 +97,12 @@ public final class ConsentStatus {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, TO_STRING_STYLE)
-                .append("name", name)
-                .append("subpopulationGuid", subpopulationGuid)
-                .append("isRequired", required)
-                .append("isConsented", consented)
-                .append("isMostRecentConsent", mostRecentConsent).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("name", name)
+                .add("subpopulationGuid", subpopulationGuid)
+                .add("isRequired", required)
+                .add("isConsented", consented)
+                .add("isMostRecentConsent", mostRecentConsent)
+                .toString();
     }
-
 }

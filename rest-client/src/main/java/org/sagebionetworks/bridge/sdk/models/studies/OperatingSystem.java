@@ -13,9 +13,10 @@ public enum OperatingSystem {
     IOS("iPhone OS"),
     ANDROID("Android");
     
-    private OperatingSystem(String osName) {
+    OperatingSystem(String osName) {
         this.osName = osName;
     }
+
     private final String osName;
 
     @JsonCreator
