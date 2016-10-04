@@ -12,15 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Test;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
-import org.junit.Test;
-
-import org.sagebionetworks.bridge.Tests;
-import org.sagebionetworks.bridge.sdk.Roles;
-import org.sagebionetworks.bridge.sdk.models.subpopulations.SubpopulationGuid;
-import org.sagebionetworks.bridge.sdk.utils.Utilities;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -29,6 +25,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import org.sagebionetworks.bridge.Tests;
+import org.sagebionetworks.bridge.sdk.Roles;
+import org.sagebionetworks.bridge.sdk.models.subpopulations.SubpopulationGuid;
+import org.sagebionetworks.bridge.sdk.utils.Utilities;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
@@ -55,12 +56,28 @@ public class StudyParticipantTest {
         Map<String,List<UserConsentHistory>> consentHistories = new HashMap<>();
         consentHistories.put("subpopGuid", Lists.newArrayList(history));
         
-        StudyParticipant participant = new StudyParticipant("firstName", "lastName", "email@email.com", "externalId",
-                "password", SharingScope.ALL_QUALIFIED_RESEARCHERS, true, DATA_GROUPS, "healthCode", ATTRIBUTES, consentHistories,
-                Sets.newHashSet(Roles.DEVELOPER), CREATED_ON, AccountStatus.ENABLED, LANGUAGES, ID);
+        StudyParticipant participant = new StudyParticipant("studyId",
+                "firstName",
+                "lastName",
+                "email@email.com",
+                "externalId",
+                "password",
+                SharingScope.ALL_QUALIFIED_RESEARCHERS,
+                true,
+                DATA_GROUPS,
+                "healthCode",
+                ATTRIBUTES,
+                consentHistories,
+                Sets.newHashSet(Roles.DEVELOPER),
+                CREATED_ON,
+                AccountStatus.ENABLED,
+                LANGUAGES,
+                ID
+        );
         
         JsonNode node = Utilities.getMapper().valueToTree(participant);
-        
+
+        assertEquals("studyId", node.get("studyId").asText());
         assertEquals("firstName", node.get("firstName").asText());
         assertEquals("lastName", node.get("lastName").asText());
         assertEquals("externalId", node.get("externalId").asText());

@@ -18,6 +18,7 @@ import org.sagebionetworks.bridge.sdk.Roles;
 
 public final class StudyParticipant {
 
+    private final String studyId;
     private final String firstName;
     private final String lastName;
     private final String externalId;
@@ -36,22 +37,23 @@ public final class StudyParticipant {
     private final Map<String,String> attributes;
     
     @JsonCreator
-    StudyParticipant(@JsonProperty("firstName") String firstName, 
-            @JsonProperty("lastName") String lastName, 
-            @JsonProperty("email") String email, 
-            @JsonProperty("externalId") String externalId,
-            @JsonProperty("password") String password,
-            @JsonProperty("sharingScope") SharingScope sharingScope,
-            @JsonProperty("notifyByEmail") Boolean notifyByEmail, 
-            @JsonProperty("dataGroups") Set<String> dataGroups, 
-            @JsonProperty("healthCode") String healthCode, 
-            @JsonProperty("attributes") Map<String,String> attributes,
-            @JsonProperty("consentHistories") Map<String,List<UserConsentHistory>> consentHistories, 
-            @JsonProperty("roles") Set<Roles> roles, 
-            @JsonProperty("createdOn") DateTime createdOn,
-            @JsonProperty("status") AccountStatus status,
-            @JsonProperty("languages") LinkedHashSet<String> languages,
-            @JsonProperty("id") String id) {
+    StudyParticipant(@JsonProperty("studyId") String studyId,
+                     @JsonProperty("firstName") String firstName,
+                     @JsonProperty("lastName") String lastName,
+                     @JsonProperty("email") String email,
+                     @JsonProperty("externalId") String externalId,
+                     @JsonProperty("password") String password,
+                     @JsonProperty("sharingScope") SharingScope sharingScope,
+                     @JsonProperty("notifyByEmail") Boolean notifyByEmail,
+                     @JsonProperty("dataGroups") Set<String> dataGroups,
+                     @JsonProperty("healthCode") String healthCode,
+                     @JsonProperty("attributes") Map<String, String> attributes,
+                     @JsonProperty("consentHistories") Map<String, List<UserConsentHistory>> consentHistories,
+                     @JsonProperty("roles") Set<Roles> roles,
+                     @JsonProperty("createdOn") DateTime createdOn,
+                     @JsonProperty("status") AccountStatus status,
+                     @JsonProperty("languages") LinkedHashSet<String> languages,
+                     @JsonProperty("id") String id) {
         ImmutableSet<String> finalDataGroups = (dataGroups == null) ? null : ImmutableSet.copyOf(dataGroups);
         ImmutableSet<Roles> finalRoles = (roles == null) ? null : ImmutableSet.copyOf(roles);
         ImmutableMap<String,String> finalAttributes = (attributes == null) ? null : ImmutableMap.copyOf(attributes);
@@ -73,8 +75,10 @@ public final class StudyParticipant {
         this.id = id;
         this.languages = finalLangs;
         this.attributes = finalAttributes;
+        this.studyId = studyId;
     }
-    
+
+    public String getStudyId() { return studyId; }
     public String getFirstName() {
         return firstName;
     }
@@ -126,7 +130,7 @@ public final class StudyParticipant {
 
     @Override
     public int hashCode() {
-        return Objects.hash(attributes, consentHistories, dataGroups, email, externalId, password, firstName, 
+        return Objects.hash(studyId, attributes, consentHistories, dataGroups, email, externalId, password, firstName,
                 lastName, healthCode, languages, notifyByEmail, roles, createdOn, status, sharingScope, id);
     }
 
@@ -137,7 +141,9 @@ public final class StudyParticipant {
         if (obj == null || getClass() != obj.getClass())
             return false;
         StudyParticipant other = (StudyParticipant) obj;
-        return Objects.equals(attributes, other.attributes) && Objects.equals(consentHistories, other.consentHistories)
+        return Objects.equals(studyId, other.studyId) && Objects.equals(attributes, other.attributes) && Objects.equals(consentHistories,
+                other
+                .consentHistories)
                 && Objects.equals(dataGroups, other.dataGroups) && Objects.equals(email, other.email)
                 && Objects.equals(externalId, other.externalId) && Objects.equals(password, other.password)
                 && Objects.equals(firstName, other.firstName) && Objects.equals(healthCode, other.healthCode) 
@@ -150,6 +156,7 @@ public final class StudyParticipant {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                .add("studyId", studyId)
                 .add("firstName", firstName)
                 .add("lastName", lastName)
                 .add("externalId", externalId)
@@ -170,6 +177,7 @@ public final class StudyParticipant {
     }
     
     public static class Builder {
+        private String studyId;
         private String firstName;
         private String lastName;
         private String email;
@@ -185,6 +193,7 @@ public final class StudyParticipant {
         private String id;
         
         public Builder copyOf(StudyParticipant participant) {
+            this.studyId = participant.studyId;
             this.firstName = participant.firstName;
             this.lastName = participant.lastName;
             this.email = participant.email;
@@ -197,6 +206,10 @@ public final class StudyParticipant {
             this.dataGroups = participant.dataGroups;
             this.attributes = participant.attributes;
             this.languages = participant.languages;
+            return this;
+        }
+        public Builder withStudyId(String studyId) {
+            this.studyId = studyId;
             return this;
         }
         public Builder withFirstName(String firstName) {
@@ -253,8 +266,24 @@ public final class StudyParticipant {
         }
         
         public StudyParticipant build() {
-            return new StudyParticipant(firstName, lastName, email, externalId, password, sharingScope, notifyByEmail, 
-                    dataGroups, null, attributes, null, roles, null, status, languages, id);
+            return new StudyParticipant(studyId,
+                    firstName,
+                    lastName,
+                    email,
+                    externalId,
+                    password,
+                    sharingScope,
+                    notifyByEmail,
+                    dataGroups,
+                    null,
+                    attributes,
+                    null,
+                    roles,
+                    null,
+                    status,
+                    languages,
+                    id
+            );
         }
     }    
 }
