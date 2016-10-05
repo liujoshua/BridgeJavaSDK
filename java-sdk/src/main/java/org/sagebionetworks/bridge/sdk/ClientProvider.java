@@ -6,22 +6,30 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.LinkedHashSet;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.sagebionetworks.bridge.sdk.exceptions.ConsentRequiredException;
 import org.sagebionetworks.bridge.sdk.models.accounts.EmailCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyUserCredentials;
+import org.sagebionetworks.bridge.sdk.rest.AuthenticationService;
+import org.sagebionetworks.bridge.sdk.rest.RestClientProvider;
 import org.sagebionetworks.bridge.sdk.utils.Utilities;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ClientProvider {
     
     private static final Config config = new Config();
     
     private static ClientInfo info = new ClientInfo.Builder().build();
+
+    private static AuthenticationService authenticationService = new RestClientProvider(config.getEnvironment().getUrl(), getClientInfo()
+            .toString(), null)
+            .getAuthenticationService();
     
     private static LinkedHashSet<String> languages = new LinkedHashSet<>();
-    
+
     /**
      * Retrieve the Config object for the system.
      *
@@ -66,8 +74,8 @@ public class ClientProvider {
     public static BridgeSession signIn(StudyUserCredentials signIn) throws ConsentRequiredException {
         checkNotNull(signIn, "StudyUserCredentials required.");
 
-        UserSession userSession = new BaseApiCaller(null).post(config.getSignInApi(), signIn, UserSession.class);
-        return new BridgeSession(userSession);
+        // fix
+        return new BridgeSession(authenticationService.signIn(signIn).execute().body());
     }
 
     /**
@@ -84,10 +92,22 @@ public class ClientProvider {
         checkArgument(isNotBlank(studyId), "Study ID required.");
         checkNotNull(participant, "StudyParticipant required.");
 
-        ObjectNode node = (ObjectNode)Utilities.getMapper().valueToTree(participant);
-        node.put("study", studyId);
+        signUp(new StudyParticipant.Builder().copyOf(participant).withStudyId(studyId).build());
+    }
 
-        new BaseApiCaller(null).post(config.getSignUpApi(), node);
+    /**
+     * Sign Up an account with Bridge using the given credentials.
+     *
+     * @param studyParticipant
+     *      Participant information for the account (email and password are the minimal information
+     *      required, but any portion of the information you wish to save for a participant may
+     *      be saved at sign up).
+     */
+    public static void signUp(StudyParticipant studyParticipant) {
+        checkNotNull(studyParticipant, "StudyParticipant required.");
+
+        // exec
+        authenticationService.signUp(studyParticipant);
     }
     
     /**
@@ -98,8 +118,10 @@ public class ClientProvider {
      */
     public static void resendEmailVerification(EmailCredentials email) {
         checkNotNull(email, "EmailCredentials required");
-        
-        new BaseApiCaller(null).post(config.getResendEmailVerificationApi(), email);
+
+        // need to execute and handle errors
+        authenticationService
+                .resendEmailVerification(convert(email));
     }
 
     /**
@@ -111,6 +133,11 @@ public class ClientProvider {
     public static void requestResetPassword(EmailCredentials email) {
         checkNotNull(email, "EmailCredentials required");
 
-        new BaseApiCaller(null).post(config.getRequestResetPasswordApi(), email);
+        // need to execute and handle errors
+        authenticationService.requestResetPassword(convert(email));
+    }
+
+    private static StudyUserCredentials convert(EmailCredentials email) {
+        return new StudyUserCredentials(email.getStudyIdentifier(), email.getEmail(), "placeholder");
     }
 }
