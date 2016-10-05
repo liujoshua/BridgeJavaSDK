@@ -6,13 +6,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.LinkedHashSet;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.sagebionetworks.bridge.sdk.exceptions.ConsentRequiredException;
 import org.sagebionetworks.bridge.sdk.models.accounts.EmailCredentials;
-import org.sagebionetworks.bridge.sdk.models.accounts.StudyUserCredentials;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
+import org.sagebionetworks.bridge.sdk.models.accounts.StudyUserCredentials;
 import org.sagebionetworks.bridge.sdk.utils.Utilities;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ClientProvider {
     
@@ -63,7 +63,7 @@ public class ClientProvider {
      *            The credentials you wish to sign in with.
      * @return Session
      */
-    public static Session signIn(StudyUserCredentials signIn) throws ConsentRequiredException {
+    public static BridgeSession signIn(StudyUserCredentials signIn) throws ConsentRequiredException {
         checkNotNull(signIn, "StudyUserCredentials required.");
 
         UserSession userSession = new BaseApiCaller(null).post(config.getSignInApi(), signIn, UserSession.class);

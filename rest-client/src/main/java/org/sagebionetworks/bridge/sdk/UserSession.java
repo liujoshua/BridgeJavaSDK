@@ -1,17 +1,6 @@
 package org.sagebionetworks.bridge.sdk;
 
-import static org.sagebionetworks.bridge.sdk.utils.Utilities.TO_STRING_STYLE;
-
 import java.util.Map;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import org.sagebionetworks.bridge.sdk.exceptions.BridgeSDKException;
-import org.sagebionetworks.bridge.sdk.json.SubpopulationGuidKeyDeserializer;
-import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
-import org.sagebionetworks.bridge.sdk.models.subpopulations.ConsentStatus;
-import org.sagebionetworks.bridge.sdk.models.subpopulations.SubpopulationGuid;
-import org.sagebionetworks.bridge.sdk.utils.Utilities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,12 +8,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 
-final class UserSession {
+import org.sagebionetworks.bridge.sdk.exceptions.BridgeSDKException;
+import org.sagebionetworks.bridge.sdk.json.SubpopulationGuidKeyDeserializer;
+import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
+import org.sagebionetworks.bridge.sdk.models.subpopulations.ConsentStatus;
+import org.sagebionetworks.bridge.sdk.models.subpopulations.SubpopulationGuid;
+
+
+public final class UserSession {
 
     private static final TypeReference<Map<SubpopulationGuid, ConsentStatus>> CONSENT_STATUS_MAP = new TypeReference<Map<SubpopulationGuid, ConsentStatus>>() {};
-    private static final ObjectMapper MAPPER = Utilities.getMapper();
+    private static final ObjectMapper MAPPER = Configuration.getMapper();
     
     @JsonCreator
     public static final UserSession fromJSON(JsonNode node) {
@@ -82,10 +79,14 @@ final class UserSession {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, TO_STRING_STYLE).append("sessionToken", sessionToken)
-                .append("authenticated", authenticated).append("consented", isConsented())
-                .append("signedMostRecentConsent", hasSignedMostRecentConsent())
-                .append("studyParticipant", studyParticipant).append("consentStatuses", consentStatuses).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("sessionToken", sessionToken)
+                .add("authenticated", authenticated)
+                .add("consented", isConsented())
+                .add("signedMostRecentConsent", hasSignedMostRecentConsent())
+                .add("studyParticipant", studyParticipant)
+                .add("consentStatuses", consentStatuses)
+                .toString();
     }
 
 }

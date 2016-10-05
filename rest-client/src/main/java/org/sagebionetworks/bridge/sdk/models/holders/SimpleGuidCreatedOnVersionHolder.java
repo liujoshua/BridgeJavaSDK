@@ -21,7 +21,7 @@ public final class SimpleGuidCreatedOnVersionHolder implements GuidCreatedOnVers
     @JsonCreator
     public SimpleGuidCreatedOnVersionHolder(@JsonProperty("guid") String guid,
             @JsonProperty("createdOn") DateTime createdOn, @JsonProperty("version") Long version) {
-        checkArgument(!Strings.isNullOrEmpty(guid), "%s cannot be blank", "guid");
+        checkArgument(!Strings.nullToEmpty(guid).trim().isEmpty(), "%s cannot be blank", "guid");
         checkNotNull(createdOn, "%s cannot be null", "createdOn");
         
         this.guid = guid;

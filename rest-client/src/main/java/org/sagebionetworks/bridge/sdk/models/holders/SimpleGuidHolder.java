@@ -14,7 +14,7 @@ public final class SimpleGuidHolder implements GuidHolder {
     
     @JsonCreator
     public SimpleGuidHolder(@JsonProperty("guid") String guid) {
-        checkNotNull(!Strings.isNullOrEmpty(guid), "%s cannot be blank", "guid");
+        checkNotNull(!Strings.nullToEmpty(guid).trim().isEmpty(), "%s cannot be blank", "guid");
         this.guid = guid;
     }
     

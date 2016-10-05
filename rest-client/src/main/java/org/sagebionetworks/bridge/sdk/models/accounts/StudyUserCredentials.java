@@ -16,9 +16,9 @@ public final class StudyUserCredentials {
     @JsonCreator
     public StudyUserCredentials(@JsonProperty("study") String studyIdentifier, @JsonProperty("email") String email,
                                 @JsonProperty("password") String password) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(studyIdentifier), "Study identifier cannot be blank/null");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(email), "Email cannot be blank/null");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(password), "Password cannot be blank/null");
+        Preconditions.checkArgument(!Strings.nullToEmpty(studyIdentifier).trim().isEmpty(), "Study identifier cannot be blank/null");
+        Preconditions.checkArgument(!Strings.nullToEmpty(email).trim().isEmpty(), "Email cannot be blank/null");
+        Preconditions.checkArgument(!Strings.nullToEmpty(password).trim().isEmpty(), "Password cannot be blank/null");
 
         this.studyIdentifier = studyIdentifier;
         this.email = email;

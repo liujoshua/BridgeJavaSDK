@@ -1,6 +1,6 @@
 package org.sagebionetworks.bridge.sdk.rest;
 
-import org.sagebionetworks.bridge.sdk.Session;
+import org.sagebionetworks.bridge.sdk.UserSession;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyParticipant;
 import org.sagebionetworks.bridge.sdk.models.accounts.StudyUserCredentials;
 
@@ -19,7 +19,7 @@ public interface AuthenticationService {
 
     @Headers("Content-Type: application/json")
     @POST("v3/auth/signIn")
-    Call<Session> signIn(@Body StudyUserCredentials body);
+    Call<UserSession> signIn(@Body StudyUserCredentials body);
 
     @POST("/v3/auth/signOut")
     Call<ResponseBody> signOut();

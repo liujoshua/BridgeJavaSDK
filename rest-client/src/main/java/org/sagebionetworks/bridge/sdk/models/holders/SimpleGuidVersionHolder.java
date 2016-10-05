@@ -15,7 +15,7 @@ public final class SimpleGuidVersionHolder implements GuidVersionHolder {
     
     @JsonCreator
     public SimpleGuidVersionHolder(@JsonProperty("guid") String guid, @JsonProperty("version") Long version) {
-        checkNotNull(!Strings.isNullOrEmpty(guid), "%s cannot be blank", "guid");
+        checkNotNull(!Strings.nullToEmpty(guid).trim().isEmpty(), "%s cannot be blank", "guid");
         this.guid = guid;
         this.version = version;
     }

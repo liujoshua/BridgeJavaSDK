@@ -1,18 +1,18 @@
 package org.sagebionetworks.bridge.sdk.exceptions;
 
-import org.sagebionetworks.bridge.sdk.Session;
+import org.sagebionetworks.bridge.sdk.BridgeSession;
 
 @SuppressWarnings("serial")
 public final class ConsentRequiredException extends BridgeSDKException {
 
-    private final Session session;
+    private final BridgeSession session;
 
-    public ConsentRequiredException(String message, String endpoint, Session session) {
+    public ConsentRequiredException(String message, String endpoint, BridgeSession session) {
         super(message, 412, endpoint);
         this.session = session;
     }
 
-    public final Session getSession() {
+    public final BridgeSession getSession() {
         return session;
     }
 

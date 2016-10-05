@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.base.Strings;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import org.sagebionetworks.bridge.sdk.exceptions.InvalidEntityException;
 
@@ -91,8 +92,9 @@ public final class UploadRequest {
             contentLength = file.length();
 
             byte[] fileBytes = Files.toByteArray(file);
-            contentMd5 = Base64.encodeBase64String(DigestUtils.md5(fileBytes));
-
+            HashCode hc = Hashing.md5()
+                   .hashBytes(fileBytes);
+            contentMd5 = BaseEncoding.base64().encode(hc.asBytes());
             return this;
         }
 
@@ -151,16 +153,16 @@ public final class UploadRequest {
          *         if called with invalid fields
          */
         public UploadRequest build() throws InvalidEntityException {
-            if (StringUtils.isBlank(name)) {
+            if (Strings.nullToEmpty(name).trim().isEmpty()) {
                 throw new InvalidEntityException("name cannot be blank");
             }
             if (contentLength < 0) {
                 throw new InvalidEntityException("content length cannot be negative");
             }
-            if (StringUtils.isBlank(contentMd5)) {
+            if (Strings.nullToEmpty(contentMd5).trim().isEmpty()) {
                 throw new InvalidEntityException("contentMd5 cannot be blank");
             }
-            if (StringUtils.isBlank(contentType)) {
+            if (Strings.nullToEmpty(contentType).trim().isEmpty()) {
                 throw new InvalidEntityException("contentType cannot be blank");
             }
 
