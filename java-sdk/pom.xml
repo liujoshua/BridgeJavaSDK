@@ -112,13 +112,16 @@
         </dependency>
     </dependencies>
 
+<profiles>
+  <profile>
+    <id>documentation</id>
+
     <distributionManagement>
         <site>
             <id>s3.site</id>
             <url>s3://developer.sagebridge.org/${project.artifactId}/${project.version}</url>
         </site>    
     </distributionManagement>
-
     <reporting>
         <plugins>
             <plugin>
@@ -138,6 +141,8 @@
         </plugins>
     </reporting>
 
+  </profile>
+</profiles>
     <build>
         <extensions>
             <extension>
@@ -147,4 +152,7 @@
             </extension>            
         </extensions>
     </build>
+    
+
+    
 </project>
