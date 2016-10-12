@@ -5,6 +5,3 @@ script:
   - mvn clean deploy
   - cd java-sdk/
   - mvn site site:deploy
-branches:
-  only:
-    - develop
