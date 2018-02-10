@@ -64,7 +64,7 @@ public class UserSessionInfoProvider {
         if (LOG.isDebugEnabled()) {
             LOG.debug(debugString("null")+ " signing in");
         }
-        signIn();
+        reauthenticate();
         return session;
     }
     
